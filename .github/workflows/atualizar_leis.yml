@@ -1,29 +1,4 @@
-name: Atualizador Automatico de Leis
-
-on:
-  schedule:
-    - cron: '0 3 * * *' # Roda todo dia às 03:00 da manhã
-  workflow_dispatch: # Permite que você rode manualmente com um clique
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Copiando o repositorio
-        uses: actions/checkout@v3
-
-      - name: Configurando Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Instalando ferramentas
-        run: pip install requests beautifulsoup4
-
-      - name: Rodando o Raspador
-        run: python app/raspador_goias.py
-
-      - name: Salvando as novas leis no GitHub
+- name: Salvando as novas leis no GitHub
         run: |
           git config --global user.name 'Robo de Leis'
           git config --global user.email 'robo@leis.com'
