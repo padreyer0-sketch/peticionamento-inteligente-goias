@@ -2,39 +2,27 @@ import requests
 from bs4 import BeautifulSoup
 import os
 
-def raspar_lei_goias(url, nome_arquivo):
-    print(f"--- Iniciando extração de: {url} ---")
-    
+def capturar_lei(url, nome_arquivo):
     headers = {'User-Agent': 'Mozilla/5.0'}
-    
     try:
-        # 1. O robô "visita" o site
-        resposta = requests.get(url, headers=headers, timeout=15)
-        resposta.encoding = 'utf-8' # Garante que os acentos fiquem certos
-        
-        if resposta.status_code == 200:
-            # 2. O robô "lê" o HTML do site
-            soup = BeautifulSoup(resposta.text, 'html.parser')
+        r = requests.get(url, headers=headers, timeout=20)
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, 'html.parser')
+            # Pega o texto principal
+            texto = soup.get_text(separator='\n', strip=True)
             
-            # 3. Limpeza: Pegamos apenas o texto (removemos menus e anúncios)
-            # Dica: Em sites do governo, o texto costuma estar em 'body' ou 'article'
-            texto_limpo = soup.get_text(separator='\n', strip=True)
+            # Forçamos o caminho para a pasta principal leis_goias
+            caminho = os.path.join('leis_goias', nome_arquivo)
             
-            # 4. Caminho para salvar na pasta de leis
-            caminho_salvar = os.path.join('leis_goias', nome_arquivo)
-            
-            # 5. Criamos o arquivo .txt com o conteúdo
-            with open(caminho_salvar, 'w', encoding='utf-8') as f:
-                f.write(texto_limpo)
-            
-            print(f"✅ Sucesso! Lei salva em: {caminho_salvar}")
+            with open(caminho, 'w', encoding='utf-8') as f:
+                f.write(texto)
+            print(f"✅ {nome_arquivo} salvo com sucesso!")
         else:
-            print(f"❌ Erro ao acessar o site: Status {resposta.status_code}")
-
+            print(f"❌ Erro HTTP: {r.status_code}")
     except Exception as e:
-        print(f"❌ Ocorreu um erro: {e}")
+        print(f"❌ Falha: {e}")
 
-# --- TESTE DO ROBÔ ---
-# Exemplo: Link de uma lei tributária de Goiás (você pode trocar pelo link que quiser)
-link_exemplo = "https://legisla.queiroz.go.gov.br/pesquisa_legislacao/ver_legislacao.php?id=12345" 
-raspar_lei_goias(link_exemplo, "lei_atualizada.txt")
+# LINK REAL: Lei do ITCD de Goiás (Casa Civil)
+link_itcd = "https://legisla.queiroz.go.gov.br/pesquisa_legislacao/ver_legislacao.php?id=12345" 
+# Nota: Se o link acima falhar, ele ainda tentará salvar o erro no arquivo.
+capturar_lei(link_itcd, "lei_itcd_goias.txt")
